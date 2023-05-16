@@ -1,7 +1,8 @@
 ---
 title: "Kamera Intai"
-subtitle: "Teknik Pemasangan dan Pengamatan Satwa"
+subtitle: "Teknik dan Desain Survei"
 author: "Ryan Avriandy"
+institute: "Disampaikan Pada;\\ \\ Peningkatan Kapasitas SDM Petugas Lapangan Balai Taman Nasional Kayan Mentarang. Tanjung Selor, 15 - 17 Mei 2023"
 format:
   revealjs: 
     slide-number: true
@@ -567,7 +568,7 @@ Sp_occs <- detectionMaps(CTtable = effort,
 in_maxent  <- Sp_occs %>%
   select(species = 'Neofelis.diardi', #ganti nama ini untuk spesies lain
          longitude = 'Longitude', latitude = 'Latitude') %>%
-  mutate(species = ifelse(species == 1, 'Neofelis.diardi', #ganti nama ini untuk spesies lain
+  mutate(species = ifelse(species > 0, 'Neofelis.diardi', #ganti nama ini untuk spesies lain
                           NA)) %>%
   na.omit()
 write.csv(in_maxent, "datasheet/in_maxent.csv")
@@ -656,15 +657,22 @@ mapview(detections_sf, zcol = "n_specs", layer.name = "Species Number")
 ```
 :::
 
-
 ## Membuat grafik aktivitas satwa {.smaller .scrollable transition="slide"}
 
 ::: panel-tabset
 ### *Code*
 
-Karena membutuhkan dataset yang agak banyak, kita akan 
-```{r act_table, echo=TRUE, results='hide', fig.show='hide'}
+::: {.callout-note icon="false"}
+## Update dataset
 
+Kita akan mengganti dataset "detecion_30m" dengan dataset yang baru, dikarenakan data sebelumnya tidak cukup banyak untuk membuat plot densitas aktivitas dengan menggunakan kode dibawah ini;
+
+url1 \<- "https://github.com/ryanavri/ct_desain_tnkm/blob/main/det_lot.csv" 
+
+detection_30m \<- read.csv(url1)
+:::
+
+```{r act_table, eval=FALSE}
 # Membuat grafik aktivitas satwa
 detection_30m$Species <- detection_30m$Scientific.Name
 
@@ -674,6 +682,26 @@ activityDensity(recordTable = detection_30m,
 
 
 # Membuat pola aktivitas tumpang tindih antara 2 spesies
+## Mengatur lokasi output plot
+po <- "D:/latihan_tnkm"
+
+## Membuat plot nya
+activityOverlap (recordTable = detection_30m,
+                 speciesA = "Bos javanicus",
+                 speciesB = "Rusa unicolor",
+                 writePNG    = TRUE,
+                 plotDirectory = po,
+                 plotR = TRUE,
+                 pngMaxPix = 1000,
+                 linecol = c("black", "blue"),
+                 linewidth = c(5,3),
+                 linetype = c(1, 2),
+                 olapcol = "darkgrey",
+                 add.rug = TRUE,
+                 extend = "lightgrey",
+                 ylim = c(0, 0.25),
+                 main = paste("Tumpang tindih: ", "Bos javanicus", "-", "Rusa unicolor")
+)
 
 
 ```
@@ -681,19 +709,38 @@ activityDensity(recordTable = detection_30m,
 ### Plot Aktivitas
 
 ```{r echo=FALSE}
-library(knitr)
-kable(Sp_occs)
+url1 <- "https://raw.githubusercontent.com/ryanavri/ct_desain_tnkm/main/det_lot.csv"
+detection_30m_n<- read.csv(url1)
+detection_30m_n$Species <- detection_30m_n$Scientific.Name
+
+
+# Membuat pola aktivitas banteng
+activityDensity(recordTable = detection_30m_n,
+                species     = 'Bos javanicus')
 ```
 
 ### Plot Tumpang Tindih
 
 ```{r echo=FALSE}
-#| label: tbl-sp_mx
-#| tbl-cap: "Data untuk maxent"
-#| tbl-cap-location: top
+po <- "D:/latihan_tnkm"
 
-library(knitr)
-kable(in_maxent)
+## Membuat plot nya
+activityOverlap (recordTable = detection_30m_n,
+                 speciesA = "Bos javanicus",
+                 speciesB = "Rusa unicolor",
+                 writePNG    = TRUE,
+                 plotDirectory = po,
+                 plotR = TRUE,
+                 pngMaxPix = 1000,
+                 linecol = c("black", "orange"),
+                 linewidth = c(5,3),
+                 linetype = c(1, 2),
+                 olapcol = "darksalmon",
+                 add.rug = TRUE,
+                 extend = "lightgrey",
+                 ylim = c(0, 0.25),
+                 main = paste("Tumpang tindih: ", "Bos javanicus", "-", "Rusa unicolor")
+)
+
 ```
 :::
-
